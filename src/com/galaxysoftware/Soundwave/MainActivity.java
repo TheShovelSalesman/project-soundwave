@@ -6,8 +6,9 @@ import java.io.IOException;
 
 import android.R.string;
 import android.media.MediaPlayer;
-import android.media.audiofx.Equalizer;
 import android.media.MediaRecorder;
+import android.media.audiofx.EnvironmentalReverb;
+import android.media.audiofx.PresetReverb;
 import android.os.Bundle;
 import android.os.Environment;
 import android.app.Activity;
@@ -21,7 +22,8 @@ public class MainActivity extends Activity {
 	private MediaRecorder recorder;
 	private String OUTPUT_FILE;
 	private TextView label;
-	private Boolean effectOn = false;
+
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -50,15 +52,9 @@ public class MainActivity extends Activity {
 			stop();
 			label.setText("Ready to play");
 			break;
-		case R.id.imageButton1:
-			changeSound();
-			break;
 		default:
 			break;
 		}
-	}
-	private void changeSound() {
-		effectOn = !effectOn;
 	}
 
 	private void stop() {
@@ -72,23 +68,18 @@ public class MainActivity extends Activity {
 		ditchPlayer();
 		mediaPlayer = new MediaPlayer();
 		mediaPlayer.setDataSource(OUTPUT_FILE);
-		
-		Equalizer eq;
-		short band;
-		short level;
-		if (effectOn) {
-			
-			int sessionId = mediaPlayer.getAudioSessionId();
-			eq = new Equalizer(0, sessionId);
-			band = eq.getBand(800);
-			level = -1490;
-			eq.setBandLevel(band, level);
-			short v [] = eq.getBandLevelRange();
-			System.out.println(Integer.toString(v[0]) + "   "+ Integer.toString(v[1]));
-			
-		} else {
-			
-		}
+		EnvironmentalReverb  eReverb = new EnvironmentalReverb(0,0); 
+        mediaPlayer.attachAuxEffect(eReverb.getId());
+		eReverb.setDecayHFRatio((short) 2000);
+		eReverb.setDecayTime(10000);
+		eReverb.setDensity((short) 1000);
+		eReverb.setDiffusion((short) 1000);
+		eReverb.setReverbLevel((short) -1000);
+		eReverb.setRoomLevel((short) 0);
+		eReverb.setEnabled(true);
+		mediaPlayer.attachAuxEffect(eReverb.getId());
+		mediaPlayer.setAuxEffectSendLevel(1.0f);
+		mediaPlayer.setAuxEffectSendLevel(1.0f);
 		mediaPlayer.prepare();
 		mediaPlayer.start();
 		
@@ -117,7 +108,7 @@ public class MainActivity extends Activity {
 		recorder = new MediaRecorder();
 		recorder.setAudioSource(MediaRecorder.AudioSource.MIC);
 		recorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
-		recorder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_WB);
+		recorder.setAudioEncoder(MediaRecorder.AudioEncoder.HE_AAC);
 		recorder.setOutputFile(OUTPUT_FILE);
 		recorder.prepare();
 		recorder.start();
