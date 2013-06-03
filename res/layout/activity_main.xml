@@ -45,4 +45,14 @@
         android:onClick="buttonTapped"
         android:text="Record" />
 
+    <CheckBox
+        android:id="@+id/checkBox1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/Button01"
+        android:layout_alignLeft="@+id/Button01"
+        android:layout_marginBottom="15dp"
+        android:onClick="buttonTapped"
+        android:text="Use Echo" />
+
 </RelativeLayout>

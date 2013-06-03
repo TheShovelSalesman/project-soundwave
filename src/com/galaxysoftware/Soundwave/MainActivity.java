@@ -15,6 +15,7 @@ import android.app.Activity;
 import android.view.Menu;
 import android.view.View;
 import android.widget.TextView;
+import android.widget.CheckBox;
 
 public class MainActivity extends Activity {
 
@@ -22,7 +23,9 @@ public class MainActivity extends Activity {
 	private MediaRecorder recorder;
 	private String OUTPUT_FILE;
 	private TextView label;
-
+	private CheckBox checkBox;
+	private boolean useEcho = false;
+	private boolean recording = false;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -30,6 +33,7 @@ public class MainActivity extends Activity {
 		setContentView(R.layout.activity_main);
 		OUTPUT_FILE = Environment.getExternalStorageDirectory()+"/audioRecording.3gpp";
 		label = (TextView) findViewById(R.id.textView1);
+		checkBox = (CheckBox) findViewById(R.id.checkBox1);
 	}
 	
 	public void buttonTapped(View view) throws Exception
@@ -52,15 +56,21 @@ public class MainActivity extends Activity {
 			stop();
 			label.setText("Ready to play");
 			break;
+		case R.id.checkBox1:
+			if (checkBox.isChecked() == true){
+				useEcho = true;
+			}else{
+				useEcho = false;
+			}
+			break;
 		default:
 			break;
 		}
 	}
 
 	private void stop() {
-		if (recorder != null){
+		
 			recorder.stop();
-		}
 		
 	}
 
@@ -68,18 +78,20 @@ public class MainActivity extends Activity {
 		ditchPlayer();
 		mediaPlayer = new MediaPlayer();
 		mediaPlayer.setDataSource(OUTPUT_FILE);
-		EnvironmentalReverb  eReverb = new EnvironmentalReverb(0,0); 
-        mediaPlayer.attachAuxEffect(eReverb.getId());
-		eReverb.setDecayHFRatio((short) 2000);
-		eReverb.setDecayTime(10000);
-		eReverb.setDensity((short) 1000);
-		eReverb.setDiffusion((short) 1000);
-		eReverb.setReverbLevel((short) -1000);
-		eReverb.setRoomLevel((short) 0);
-		eReverb.setEnabled(true);
-		mediaPlayer.attachAuxEffect(eReverb.getId());
-		mediaPlayer.setAuxEffectSendLevel(1.0f);
-		mediaPlayer.setAuxEffectSendLevel(1.0f);
+		if (useEcho == true){
+			EnvironmentalReverb  eReverb = new EnvironmentalReverb(0,0); 
+	        mediaPlayer.attachAuxEffect(eReverb.getId());
+			eReverb.setDecayHFRatio((short) 2000);
+			eReverb.setDecayTime(10000);
+			eReverb.setDensity((short) 1000);
+			eReverb.setDiffusion((short) 1000);
+			eReverb.setReverbLevel((short) -1000);
+			eReverb.setRoomLevel((short) 0);
+			eReverb.setEnabled(true);
+			mediaPlayer.attachAuxEffect(eReverb.getId());
+			mediaPlayer.setAuxEffectSendLevel(1.0f);
+			mediaPlayer.setAuxEffectSendLevel(1.0f);
+		}
 		mediaPlayer.prepare();
 		mediaPlayer.start();
 		
@@ -100,11 +112,6 @@ public class MainActivity extends Activity {
 
 	private void beginRecording() throws IOException {
 		ditchRecorder();
-		File outFile = new File(OUTPUT_FILE);
-		
-		if (outFile.exists())
-			outFile.delete();
-		
 		recorder = new MediaRecorder();
 		recorder.setAudioSource(MediaRecorder.AudioSource.MIC);
 		recorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
